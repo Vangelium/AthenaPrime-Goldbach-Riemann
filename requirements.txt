@@ -19,3 +19,13 @@ ipykernel>=6.0.0
 # Para documentación
 sphinx>=4.0.0
 sphinx-rtd-theme>=0.5.0
+
+# Para pruebas
+pytest>=7.0.0
+pytest-cov>=3.0.0
+
+# Para formateo y análisis de código
+black>=22.0.0
+flake8>=4.0.0
+isort>=5.10.0
+mypy>=0.910
