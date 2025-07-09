@@ -1,0 +1,77 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Athena Prime CI Tests # Nombre del workflow: más específico para nuestro proyecto
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ] # Se ejecuta cuando se suben cambios a la rama 'main'
+  pull_request:
+    branches: [ "main" ] # Se ejecuta cuando se crea o actualiza una Pull Request a la rama 'main'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch: # Permite ejecutar el workflow manualmente desde la interfaz de GitHub
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest # Ejecuta las pruebas en un sistema Linux (Ubuntu)
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4 # Paso para clonar tu repositorio
+
+      # Set up Python environment
+      - name: Set up Python 3.x # Nombre del paso: Configurar Python
+        uses: actions/setup-python@v5 # Usa una acción predefinida para configurar Python
+        with:
+          python-version: '3.10' # Especifica la versión de Python que queremos usar (ej. 3.10 o 3.11)
+
+      # Install dependencies
+      - name: Install dependencies # Nombre del paso: Instalar dependencias
+        working-directory: ./ # Asegura que se ejecute desde la raíz del repositorio
+        run: | # Ejecuta múltiples comandos
+          python -m pip install --upgrade pip # Actualiza pip
+          pip install -r requirements.txt # Instala todas las bibliotecas de nuestro requirements.txt
+
+      # Create necessary directories for results (if they don't exist, to avoid errors during tests)
+      - name: Create results directories # Nombre del paso: Crear directorios de resultados
+        run: |
+          mkdir -p results_corridas/temp_test_run # Crea una carpeta temporal para los resultados de la prueba
+          mkdir -p resultados_datos # Asegura que exista el directorio para goldbach_residuos.csv
+
+      # Copy Riemann zeros data for correlation test
+      - name: Copy Riemann zeros data # Nombre del paso: Copiar datos de ceros de Riemann
+        run: |
+          # Asegúrate de que este archivo esté en tu repositorio en la ruta especificada
+          cp data/processed/riemann_zeros/riemann_zeros_data_cleaned.csv resultados_datos/riemann_zeros_data_cleaned.csv
+
+      # Run a small analysis to test the main script
+      - name: Run a small analysis test # Nombre del paso: Ejecutar una pequeña prueba de análisis
+        working-directory: ./src/goldbach # Ejecuta el comando desde la carpeta src/goldbach
+        run: |
+          # Ejecutamos el script principal con un rango pequeño para que sea rápido
+          # y capturemos cualquier error de ejecución
+          python athena_prime_goldbach_app_Version2.py 10000 10500 # Rango N=10k a 10.5k
+
+      # Run the modular analysis script (which includes spectral analysis)
+      - name: Run modular analysis test # Nombre del paso: Ejecutar prueba de análisis modular
+        working-directory: ./scripts/analysis # Ejecuta el comando desde la carpeta scripts/analysis
+        run: |
+          # Ejecutamos el script de análisis modular con un rango pequeño
+          python analisis_residuos_modular.py 10000 10500 # Rango N=10k a 10.5k
+
+      # Run the Riemann correlation script
+      - name: Run Riemann correlation test # Nombre del paso: Ejecutar prueba de correlación Riemann
+        working-directory: ./scripts/analysis # Ejecuta el comando desde la carpeta scripts/analysis
+        run: |
+          # Este script lee el CSV y compara. Ahora el archivo debería estar en resultados_datos/
+          python correlacion_frecuencias_riemann_modular.py
+
+      # You can add more test steps here, e.g., for specific functions or modules
+      # - name: Run unit tests (if you have them)
+      #   run: python -m unittest discover tests
