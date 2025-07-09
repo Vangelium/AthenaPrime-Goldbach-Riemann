@@ -1,5 +1,7 @@
 # Athena Prime: Análisis de la Firma de Riemann en los Residuos de Goldbach
 
+*Última verificación de configuración de Git: 2025-07-08*
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
