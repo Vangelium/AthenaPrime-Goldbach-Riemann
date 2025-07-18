@@ -1,0 +1,8 @@
+--- Deep Anomaly Search Report ---
+Data Source: N up to 1,000,000
+Reference Zeros: 2,001,052 loaded from file.
+Found 9 significant peaks in the spectrum.
+Found 0 candidate anomalous peaks (min distance > 0.1).
+
+--- Top 10 Strongest Anomalous Peaks ---
+No significant anomalous peaks were found.

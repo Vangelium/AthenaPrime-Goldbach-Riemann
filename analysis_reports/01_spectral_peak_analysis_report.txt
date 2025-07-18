@@ -1,0 +1,18 @@
+--- Quantitative Analysis of Spectral Peaks ---
+Comparing theoretical Riemann frequencies with observed peaks in the Goldbach error spectrum.
+
+Zero  Theoretical Freq     Observed Freq        Difference           Power          
+--------------------------------------------------------------------------------
+1     2.249611             2.666659             0.417048             0.0092         
+2     3.345762             No peak found        N/A                  N/A            
+3     3.980602             No peak found        N/A                  N/A            
+4     4.842269             4.833318             -0.008951            0.0055         
+5     5.241778             5.633334             0.391556             0.0060         
+6     5.982026             6.166678             0.184652             0.0134         
+7     6.512416             6.166678             -0.345738            0.0134         
+8     6.895718             No peak found        N/A                  N/A            
+9     7.640257             8.066666             0.426408             0.0058         
+10    7.921751             8.333338             0.411586             0.1772         
+
+--- Search for Anomalous Peaks ---
+No significant anomalous peaks found.
