@@ -153,7 +153,7 @@ def get_twin_primes_double_filtered_residual(data_file):
     # Return log(x) as time-like variable and the double filtered residual
     return np.log(df_filtered['x'].values), df_filtered['double_filtered_residual'].values
 
-from goldbach_residual_clean import goldbach_residual_clean
+from scripts.goldbach.goldbach_residual_clean import goldbach_residual_clean
 
 def get_goldbach_final_clean_residual(n_max):
     clean_residual, even_numbers = goldbach_residual_clean(n_max)
@@ -281,13 +281,12 @@ def run_cross_coherence_analysis(cramer_data_path, twin_primes_data_path, goldba
 
 if __name__ == "__main__":
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    cramer_data_dir = os.path.join(project_root, 'data')
-    twin_primes_data_dir = os.path.abspath(os.path.join(project_root, '..', 'AthenaGeminus', 'data')) # Path to AthenaGeminus data
-    plots_dir = os.path.join(project_root, 'plots')
-
-    cramer_data_file = os.path.join(cramer_data_dir, "cramer_data_1000000.csv")
-    twin_primes_data_file = os.path.join(twin_primes_data_dir, "twin_prime_data_1M.csv")
+    
+    cramer_data_file = os.path.join(project_root, 'data', 'cramer', "cramer_data_1000000.csv")
+    twin_primes_data_file = os.path.join(project_root, 'data', 'twin_primes', "twin_prime_data_1M.csv")
     goldbach_data_file = None # Placeholder, no actual file needed for synthetic data
+    
+    plots_dir = os.path.join(project_root, 'plots', 'goldbach') # The comparative plot goes into goldbach plots
 
     if not os.path.exists(cramer_data_file):
         print(f"Error: Cramér data file not found at {cramer_data_file}")
