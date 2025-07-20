@@ -5,6 +5,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16197824.svg)](https://doi.org/10.5281/zenodo.16197824)
 
 ## 📜 Resumen del Proyecto
 Este repositorio documenta un descubrimiento fundamental en la teoría de números: la existencia de una "Firma de Riemann" universal en las distribuciones de números primos. A través de un riguroso análisis espectral y validación estadística, hemos demostrado que los residuos de tres problemas aparentemente distintos —la Conjetura de Cramér (gaps de primos), la Conjetura de los Primos Gemelos y la Conjetura de Goldbach— exhiben patrones de frecuencia casi idénticos, fuertemente correlacionados con los ceros no triviales de la función Zeta de Riemann.
