@@ -154,6 +154,9 @@ def get_twin_primes_double_filtered_residual(data_file):
     return np.log(df_filtered['x'].values), df_filtered['double_filtered_residual'].values
 
 from scripts.goldbach.goldbach_residual_clean import goldbach_residual_clean
+from scripts.polignac.get_polignac_residual import get_polignac_double_filtered_residual
+from scripts.bertrand.get_bertrand_residual import get_bertrand_residual
+from scripts.chen.get_chen_residual import get_chen_residual
 
 def get_goldbach_final_clean_residual(n_max):
     clean_residual, even_numbers = goldbach_residual_clean(n_max)
@@ -171,6 +174,15 @@ def run_cross_coherence_analysis(cramer_data_path, twin_primes_data_path, goldba
     t_twin, y_twin = get_twin_primes_double_filtered_residual(twin_primes_data_path)
     print("Calculating Goldbach residual...")
     t_goldbach, y_goldbach = get_goldbach_final_clean_residual(1000000) # Pass n_max
+    print("Calculating Polignac residual...")
+    polignac_data_file = os.path.join(project_root, 'data', 'polignac', 'polignac_data_n4_1M.csv')
+    t_polignac, y_polignac = get_polignac_double_filtered_residual(polignac_data_file)
+    print("Calculating Bertrand residual...")
+    bertrand_data_file = os.path.join(project_root, 'data', 'bertrand', 'bertrand_data_1M.csv')
+    t_bertrand, y_bertrand = get_bertrand_residual(bertrand_data_file)
+    print("Calculating Chen residual...")
+    chen_data_file = os.path.join(project_root, 'data', 'chen', 'chen_data_1M.csv')
+    t_chen, y_chen = get_chen_residual(chen_data_file)
 
     # Remove NaN/Inf values from all datasets
     valid_cramer = np.isfinite(t_cramer) & np.isfinite(y_cramer)
@@ -181,6 +193,15 @@ def run_cross_coherence_analysis(cramer_data_path, twin_primes_data_path, goldba
 
     valid_goldbach = np.isfinite(t_goldbach) & np.isfinite(y_goldbach)
     t_goldbach, y_goldbach = t_goldbach[valid_goldbach], y_goldbach[valid_goldbach]
+
+    valid_polignac = np.isfinite(t_polignac) & np.isfinite(y_polignac)
+    t_polignac, y_polignac = t_polignac[valid_polignac], y_polignac[valid_polignac]
+
+    valid_bertrand = np.isfinite(t_bertrand) & np.isfinite(y_bertrand)
+    t_bertrand, y_bertrand = t_bertrand[valid_bertrand], y_bertrand[valid_bertrand]
+
+    valid_chen = np.isfinite(t_chen) & np.isfinite(y_chen)
+    t_chen, y_chen = t_chen[valid_chen], y_chen[valid_chen]
 
     # Perform Lomb-Scargle for each residual
     min_freq = FREQ_RANGE_HZ[0]
@@ -194,6 +215,12 @@ def run_cross_coherence_analysis(cramer_data_path, twin_primes_data_path, goldba
     power_twin = lombscargle(t_twin, y_twin, frequencies, normalize=True)
     print("Performing spectral analysis for Goldbach...")
     power_goldbach = lombscargle(t_goldbach, y_goldbach, frequencies, normalize=True)
+    print("Performing spectral analysis for Polignac...")
+    power_polignac = lombscargle(t_polignac, y_polignac, frequencies, normalize=True)
+    print("Performing spectral analysis for Bertrand...")
+    power_bertrand = lombscargle(t_bertrand, y_bertrand, frequencies, normalize=True)
+    print("Performing spectral analysis for Chen...")
+    power_chen = lombscargle(t_chen, y_chen, frequencies, normalize=True)
 
     # --- Plotting all power spectra together ---
     print("Generating comparative power spectrum plot...")
@@ -203,8 +230,11 @@ def run_cross_coherence_analysis(cramer_data_path, twin_primes_data_path, goldba
     ax.plot(frequencies, power_cramer, color='blue', label='Cramér Residual')
     ax.plot(frequencies, power_twin, color='green', label='Twin Primes Residual')
     ax.plot(frequencies, power_goldbach, color='orange', linestyle='--', label='Goldbach Residual')
+    ax.plot(frequencies, power_polignac, color='purple', linestyle=':', label='Polignac (n=4) Residual')
+    ax.plot(frequencies, power_bertrand, color='brown', linestyle='-.', label='Bertrand Residual')
+    ax.plot(frequencies, power_chen, color='red', linestyle='-', label='Chen Residual')
 
-    ax.set_title('Comparative Lomb-Scargle Power Spectra (Cramér, Twin Primes, Goldbach)', fontsize=18)
+    ax.set_title('Comparative Lomb-Scargle Power Spectra (Cramér, Twin Primes, Goldbach, Polignac, Bertrand, Chen)', fontsize=18)
     ax.set_xlabel('Frequency (gamma / 2pi)', fontsize=14)
     ax.set_ylabel('Normalized Power', fontsize=14)
     ax.grid(True, which='both', linestyle='--', linewidth=0.5)
@@ -216,7 +246,7 @@ def run_cross_coherence_analysis(cramer_data_path, twin_primes_data_path, goldba
 
     ax.legend()
     plt.tight_layout()
-    plot_file_comparison = os.path.join(plots_dir, "12_comparative_power_spectra_1M.png")
+    plot_file_comparison = os.path.join(plots_dir, "12_comparative_power_spectra_1M_polignac_bertrand_chen.png")
     plt.savefig(plot_file_comparison, dpi=300)
     print(f"Plot saved to {plot_file_comparison}")
     plt.close(fig)
@@ -228,7 +258,10 @@ def run_cross_coherence_analysis(cramer_data_path, twin_primes_data_path, goldba
         power_c = power_cramer[closest_idx]
         power_t = power_twin[closest_idx]
         power_g = power_goldbach[closest_idx]
-        print(f"  Riemann Zero (gamma/2pi) = {r_freq:.4f} | Cramér Power = {power_c:.6f} | Twin Power = {power_t:.6f} | Goldbach Power = {power_g:.6f})")
+        power_p = power_polignac[closest_idx]
+        power_b = power_bertrand[closest_idx]
+        power_ch = power_chen[closest_idx]
+        print(f"  Riemann Zero (gamma/2pi) = {r_freq:.4f} | Cramér Power = {power_c:.6f} | Twin Power = {power_t:.6f} | Goldbach Power = {power_g:.6f} | Polignac Power = {power_p:.6f} | Bertrand Power = {power_b:.6f} | Chen Power = {power_ch:.6f})")
 
     # --- Quantitative Coherence Metrics ---
     print("\nQuantitative Coherence Metrics:")
@@ -251,6 +284,54 @@ def run_cross_coherence_analysis(cramer_data_path, twin_primes_data_path, goldba
     # Twin Primes vs Goldbach
     pearson_corr_twin_goldbach = np.corrcoef(power_twin, power_goldbach)[0,1]
     print(f"  Twin Primes vs Goldbach: {pearson_corr_twin_goldbach:.6f}")
+
+    # Cramér vs Polignac
+    pearson_corr_cramer_polignac = np.corrcoef(power_cramer, power_polignac)[0,1]
+    print(f"  Cramér vs Polignac: {pearson_corr_cramer_polignac:.6f}")
+
+    # Twin Primes vs Polignac
+    pearson_corr_twin_polignac = np.corrcoef(power_twin, power_polignac)[0,1]
+    print(f"  Twin Primes vs Polignac: {pearson_corr_twin_polignac:.6f}")
+
+    # Goldbach vs Polignac
+    pearson_corr_goldbach_polignac = np.corrcoef(power_goldbach, power_polignac)[0,1]
+    print(f"  Goldbach vs Polignac: {pearson_corr_goldbach_polignac:.6f}")
+
+    # Cramér vs Bertrand
+    pearson_corr_cramer_bertrand = np.corrcoef(power_cramer, power_bertrand)[0,1]
+    print(f"  Cramér vs Bertrand: {pearson_corr_cramer_bertrand:.6f}")
+
+    # Twin Primes vs Bertrand
+    pearson_corr_twin_bertrand = np.corrcoef(power_twin, power_bertrand)[0,1]
+    print(f"  Twin Primes vs Bertrand: {pearson_corr_twin_bertrand:.6f}")
+
+    # Goldbach vs Bertrand
+    pearson_corr_goldbach_bertrand = np.corrcoef(power_goldbach, power_bertrand)[0,1]
+    print(f"  Goldbach vs Bertrand: {pearson_corr_goldbach_bertrand:.6f}")
+
+    # Polignac vs Bertrand
+    pearson_corr_polignac_bertrand = np.corrcoef(power_polignac, power_bertrand)[0,1]
+    print(f"  Polignac vs Bertrand: {pearson_corr_polignac_bertrand:.6f}")
+
+    # Cramér vs Chen
+    pearson_corr_cramer_chen = np.corrcoef(power_cramer, power_chen)[0,1]
+    print(f"  Cramér vs Chen: {pearson_corr_cramer_chen:.6f}")
+
+    # Twin Primes vs Chen
+    pearson_corr_twin_chen = np.corrcoef(power_twin, power_chen)[0,1]
+    print(f"  Twin Primes vs Chen: {pearson_corr_twin_chen:.6f}")
+
+    # Goldbach vs Chen
+    pearson_corr_goldbach_chen = np.corrcoef(power_goldbach, power_chen)[0,1]
+    print(f"  Goldbach vs Chen: {pearson_corr_goldbach_chen:.6f}")
+
+    # Polignac vs Chen
+    pearson_corr_polignac_chen = np.corrcoef(power_polignac, power_chen)[0,1]
+    print(f"  Polignac vs Chen: {pearson_corr_polignac_chen:.6f}")
+
+    # Bertrand vs Chen
+    pearson_corr_bertrand_chen = np.corrcoef(power_bertrand, power_chen)[0,1]
+    print(f"  Bertrand vs Chen: {pearson_corr_bertrand_chen:.6f}")
 
     # --- Permutation Tests for Significance ---
     print("\nPermutation Tests (p-values for Pearson Correlation):")
@@ -278,6 +359,73 @@ def run_cross_coherence_analysis(cramer_data_path, twin_primes_data_path, goldba
     # Permutation test for Twin Primes vs Goldbach
     p_value_twin_goldbach = permutation_test_correlation(power_twin, power_goldbach)
     print(f"  p-value (Twin Primes vs Goldbach): {p_value_twin_goldbach:.6f}")
+
+    # Permutation test for Cramér vs Polignac
+    p_value_cramer_polignac = permutation_test_correlation(power_cramer, power_polignac)
+    print(f"  p-value (Cramér vs Polignac): {p_value_cramer_polignac:.6f}")
+
+    # Permutation test for Twin Primes vs Polignac
+    p_value_twin_polignac = permutation_test_correlation(power_twin, power_polignac)
+    print(f"  p-value (Twin Primes vs Polignac): {p_value_twin_polignac:.6f}")
+
+    # Permutation test for Goldbach vs Polignac
+    p_value_goldbach_polignac = permutation_test_correlation(power_goldbach, power_polignac)
+    print(f"  p-value (Goldbach vs Polignac): {p_value_goldbach_polignac:.6f}")
+
+    # Permutation test for Cramér vs Bertrand
+    p_value_cramer_bertrand = permutation_test_correlation(power_cramer, power_bertrand)
+    print(f"  p-value (Cramér vs Bertrand): {p_value_cramer_bertrand:.6f}")
+
+    # Permutation test for Twin Primes vs Bertrand
+    p_value_twin_bertrand = permutation_test_correlation(power_twin, power_bertrand)
+    print(f"  p-value (Twin Primes vs Bertrand): {p_value_twin_bertrand:.6f}")
+
+    # Permutation test for Goldbach vs Bertrand
+    p_value_goldbach_bertrand = permutation_test_correlation(power_goldbach, power_bertrand)
+    print(f"  p-value (Goldbach vs Bertrand): {p_value_goldbach_bertrand:.6f}")
+
+    # Permutation test for Polignac vs Bertrand
+    p_value_polignac_bertrand = permutation_test_correlation(power_polignac, power_bertrand)
+    print(f"  p-value (Polignac vs Bertrand): {p_value_polignac_bertrand:.6f}")
+
+    # Permutation test for Cramér vs Chen
+    p_value_cramer_chen = permutation_test_correlation(power_cramer, power_chen)
+    print(f"  p-value (Cramér vs Chen): {p_value_cramer_chen:.6f}")
+
+    # Permutation test for Twin Primes vs Chen
+    p_value_twin_chen = permutation_test_correlation(power_twin, power_chen)
+    print(f"  p-value (Twin Primes vs Chen): {p_value_twin_chen:.6f}")
+
+    # Permutation test for Goldbach vs Chen
+    p_value_goldbach_chen = permutation_test_correlation(power_goldbach, power_chen)
+    print(f"  p-value (Goldbach vs Chen): {p_value_goldbach_chen:.6f}")
+
+    # Permutation test for Polignac vs Chen
+    p_value_polignac_chen = permutation_test_correlation(power_polignac, power_chen)
+    print(f"  p-value (Polignac vs Chen): {p_value_polignac_chen:.6f}")
+
+    # Permutation test for Bertrand vs Chen
+    p_value_bertrand_chen = permutation_test_correlation(power_bertrand, power_chen)
+    print(f"  p-value (Bertrand vs Chen): {p_value_bertrand_chen:.6f}")
+
+if __name__ == "__main__":
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    
+    cramer_data_file = os.path.join(project_root, 'data', 'cramer', "cramer_data_1000000.csv")
+    twin_primes_data_file = os.path.join(project_root, 'data', 'twin_primes', "twin_prime_data_1M.csv")
+    goldbach_data_file = None # Placeholder, no actual file needed for synthetic data
+    
+    plots_dir = os.path.join(project_root, 'plots', 'goldbach') # The comparative plot goes into goldbach plots
+
+    if not os.path.exists(cramer_data_file):
+        print(f"Error: Cramér data file not found at {cramer_data_file}")
+        exit()
+    if not os.path.exists(twin_primes_data_file):
+        print(f"Error: Twin Primes data file not found at {twin_primes_data_file}")
+        exit()
+
+    run_cross_coherence_analysis(cramer_data_file, twin_primes_data_file, goldbach_data_file, plots_dir)
+    print("\nCross-coherence analysis completed.")
 
 if __name__ == "__main__":
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))

@@ -1,7 +1,7 @@
 
 import numpy as np
 from scipy.signal import butter, filtfilt
-from goldbach_core_functions import compute_goldbach_sequence, goldbach_asymptotic
+from scripts.goldbach.goldbach_core_functions import compute_goldbach_sequence, goldbach_asymptotic
 
 def goldbach_residual_clean(n_max):
     """
